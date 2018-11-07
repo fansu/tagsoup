@@ -10,19 +10,36 @@
 // is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
 // OF ANY KIND, either express or implied; not even the implied warranty
 // of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// 
-// 
+//
+//
 // The TagSoup parser
 
 package org.ccil.cowan.tagsoup;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
-import org.xml.sax.*;
-import org.xml.sax.helpers.DefaultHandler;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.ccil.cowan.tagsoup.templates.HTMLScanner;
+import org.ccil.cowan.tagsoup.templates.HTMLSchema;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.DTDHandler;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
+import org.xml.sax.XMLReader;
 import org.xml.sax.ext.LexicalHandler;
+import org.xml.sax.helpers.DefaultHandler;
 
 
 /**
@@ -53,7 +70,7 @@ public class Parser extends DefaultHandler implements ScanHandler, XMLReader, Le
 	private static boolean DEFAULT_IGNORABLE_WHITESPACE = false;
 	private static boolean DEFAULT_CDATA_ELEMENTS = true;
 
-	// Feature flags.  
+	// Feature flags.
 
 	private boolean namespaces = DEFAULT_NAMESPACES;
 	private boolean ignoreBogons = DEFAULT_IGNORE_BOGONS;
@@ -214,21 +231,21 @@ public class Parser extends DefaultHandler implements ScanHandler, XMLReader, Le
 		"http://www.ccil.org/~cowan/tagsoup/features/default-attributes";
 
 	/**
-	A value of "true" indicates that the parser will 
+	A value of "true" indicates that the parser will
 	translate colons into underscores in names.
 	**/
 	public final static String translateColonsFeature =
 		"http://www.ccil.org/~cowan/tagsoup/features/translate-colons";
 
 	/**
-	A value of "true" indicates that the parser will 
+	A value of "true" indicates that the parser will
 	attempt to restart the restartable elements.
 	**/
 	public final static String restartElementsFeature =
 		"http://www.ccil.org/~cowan/tagsoup/features/restart-elements";
 
 	/**
-	A value of "true" indicates that the parser will 
+	A value of "true" indicates that the parser will
 	transmit whitespace in element-only content via the SAX
 	ignorableWhitespace callback.  Normally this is not done,
 	because HTML is an SGML application and SGML suppresses
@@ -819,15 +836,12 @@ public class Parser extends DefaultHandler implements ScanHandler, XMLReader, Le
 		}
 
         /**
-         * Parsing the complete XML Document Type Definition is way too complex,
-         * but for many simple cases we can extract something useful from it.
-         *
-         * doctypedecl  ::= '<!DOCTYPE' S Name (S ExternalID)? S? ('[' intSubset ']' S?)? '>'
-         *  DeclSep     ::= PEReference | S
-         *  intSubset   ::= (markupdecl | DeclSep)*
-         *  markupdecl  ::= elementdecl | AttlistDecl | EntityDecl | NotationDecl | PI | Comment
-         *  ExternalID  ::= 'SYSTEM' S SystemLiteral | 'PUBLIC' S PubidLiteral S SystemLiteral
-         */
+     * Parsing the complete XML Document Type Definition is way too complex, but for many simple cases we can extract something useful from it.
+     *
+     * doctypedecl ::= '&lt;!DOCTYPE' S Name (S ExternalID)? S? ('[' intSubset ']' S?)? '&gt;' DeclSep ::= PEReference | S intSubset ::= (markupdecl |
+     * DeclSep)* markupdecl ::= elementdecl | AttlistDecl | EntityDecl | NotationDecl | PI | Comment ExternalID ::= 'SYSTEM' S SystemLiteral |
+     * 'PUBLIC' S PubidLiteral S SystemLiteral
+     */
 	public void decl(char[] buff, int offset, int length) throws SAXException {
 		String s = new String(buff, offset, length);
 		String name = null;

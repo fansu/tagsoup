@@ -13,17 +13,20 @@
 
 package org.ccil.cowan.tagsoup.jaxp;
 
-import java.io.*;
-import java.util.*;
-import javax.xml.parsers.*;
+import java.util.Iterator;
+import java.util.Map;
 
-import org.xml.sax.*;
+import javax.xml.parsers.SAXParser;
 
 import org.ccil.cowan.tagsoup.Parser;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
+import org.xml.sax.XMLReader;
 
 /**
  * This is a simple implementation of JAXP {@link SAXParser},
- * to allow easier integration of TagSoup with the default JDK 
+ * to allow easier integration of TagSoup with the default JDK
  * xml processing stack.
  *
  * @author Tatu Saloranta (cowtowncoder@yahoo.com)
@@ -59,14 +62,18 @@ public class SAXParserImpl
      * To support SAX1 interface, we'll need to use an adapter.
      * @deprecated
      */
+    @Deprecated
+    @Override
     public org.xml.sax.Parser getParser()
         throws SAXException
     {
         return new SAX1ParserAdapter(parser);
     }
 
+    @Override
     public XMLReader getXMLReader() { return parser; }
-    
+
+    @Override
     public boolean isNamespaceAware()
     {
         try {
@@ -76,6 +83,7 @@ public class SAXParserImpl
         }
     }
 
+    @Override
     public boolean isValidating()
     {
         try {
@@ -85,12 +93,14 @@ public class SAXParserImpl
         }
     }
 
+    @Override
     public void setProperty(String name, Object value)
         throws SAXNotRecognizedException, SAXNotSupportedException
     {
         parser.setProperty(name, value);
     }
 
+    @Override
     public Object getProperty(String name)
         throws SAXNotRecognizedException, SAXNotSupportedException
     {
